@@ -7,8 +7,22 @@
     "test": "jest"
   },
   "dependencies": {
+    "GitHubTrending": "^3.0.1",
+    "asap": "^2.0.6",
+    "mobx": "^5.7.0",
+    "prop-types": "latest",
     "react": "16.6.1",
-    "react-native": "0.57.7"
+    "react-native": "0.57.7",
+    "react-native-autocomplete-input": "^3.6.0",
+    "react-native-check-box": "^2.1.6",
+    "react-native-deprecated-custom-components": "^0.1.2",
+    "react-native-easy-toast": "^1.1.0",
+    "react-native-htmlview": "^0.13.0",
+    "react-native-scrollable-tab-view": "^0.10.0",
+    "react-native-sortable-listview": "^0.2.8",
+    "react-native-tab-navigator": "^0.3.4",
+    "react-navigation": "^3.0.4",
+    "rn-viewpager": "^1.2.9"
   },
   "devDependencies": {
     "babel-jest": "23.6.0",
