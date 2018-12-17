@@ -9,7 +9,7 @@
 import React, {Component} from 'react';
 import {Navigator} from 'react-native-deprecated-custom-components'
 import MobxTest from "../MobxTest";
-import MyPage from "./My/MyPage";
+import MyPageTest from "./My/MyPageTest";
 import WelcomePage from "./WelcomePage";
 
 function setup() {

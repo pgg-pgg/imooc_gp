@@ -23,6 +23,10 @@ import Popover from "../../common/Popover";
 import FavoriteDao from "../../expand/dao/FavoriteDao";
 import ProjectModel from "../../model/ProjectModel";
 import Utils from "../../util/Utils";
+import ActionUtils from "../../util/ActionUtils";
+import {FLAG_TAB} from "../HomePage";
+import MoreMenu, {MORE_MENU} from "../../common/MoreMenu";
+import ViewUtils from "../../util/ViewUtils";
 
 const API_URL = "https://github.com/trending/";
 var timeSpanTextArray = [new TimeSpan('今 天', 'since=daily'), new TimeSpan('本 周', 'since=weekly'), new TimeSpan('本 月', 'since=monthly')];
@@ -39,7 +43,7 @@ export default class TrendingPage extends Component {
             languages: [],
             isVisible: false,
             buttonRect: {},
-            timeSpan :timeSpanTextArray[0]
+            timeSpan: timeSpanTextArray[0]
         }
     }
 
@@ -48,7 +52,7 @@ export default class TrendingPage extends Component {
     }
 
     componentWillReceiveProps(nextProps: Readonly<P>, nextContext: any): void {
-        if (nextProps.timeSpan!==this.props.timeSpan){
+        if (nextProps.timeSpan !== this.props.timeSpan) {
             this.loadData(nextProps.timeSpan)
         }
     }
@@ -85,18 +89,41 @@ export default class TrendingPage extends Component {
                 this.showPopover()
             }}>
                 <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <Text style={{fontSize: 18, color: 'white', fontWeight: '400'}}>趋势 {this.state.timeSpan.showText}</Text>
+                    <Text style={{
+                        fontSize: 18,
+                        color: 'white',
+                        fontWeight: '400'
+                    }}>趋势 {this.state.timeSpan.showText}</Text>
                     <Image style={{width: 12, height: 12, marginLeft: 5}}
                            source={require('../../../res/images/ic_spinner_triangle.png')}/>
                 </View>
             </TouchableOpacity>
         </View>
     }
-    onSelectTimeSpan(timeSpan){
+
+    onSelectTimeSpan(timeSpan) {
         this.setState({
-            timeSpan:timeSpan,
-            isVisible:false,
+            timeSpan: timeSpan,
+            isVisible: false,
         })
+    }
+
+    renderMoreView() {
+        let params = {...this.props, fromPage: FLAG_TAB.flag_popularTab};
+        return <MoreMenu
+            ref="moreMenu"
+            {...params}
+            menus={[MORE_MENU.Custom_Language, MORE_MENU.Sort_Language,MORE_MENU.Share, MORE_MENU.Custom_Theme,
+                MORE_MENU.About_Author, MORE_MENU.About]}
+            anchorView={() => this.refs.moreMenuButton}
+            onMoreMenuSelect={(e) => {
+                if (e === MORE_MENU.Custom_Theme) {
+                    this.setState({
+                        customThemeViewVisible: true
+                    })
+                }
+            }}
+        />
     }
 
     render() {
@@ -109,26 +136,33 @@ export default class TrendingPage extends Component {
             {this.state.languages.map((result, i, arr) => {
                 let lan = arr[i];
                 return lan.checked ?
-                    <TrendingTab key={i} tabLabel={lan.name} timeSpan = {this.state.timeSpan} {...this.props}>{lan.name}</TrendingTab> : null;
+                    <TrendingTab key={i} tabLabel={lan.name}
+                                 timeSpan={this.state.timeSpan} {...this.props}>{lan.name}</TrendingTab> : null;
             })}
         </ScrollableTabView> : null;
         let timeSpanView = <Popover
             isVisible={this.state.isVisible}
             fromRect={this.state.buttonRect}
             placement={'bottom'}
-            contentStyle={{backgroundColor:'#343434',opacity:0.5}}
-            onClose={()=>this.closePopover()}>
+            contentStyle={{backgroundColor: '#343434', opacity: 0.5}}
+            onClose={() => this.closePopover()}>
             {timeSpanTextArray.map((result, i, arr) => {
-                return <TouchableOpacity key={i} underlayColor={'transparent'} onPress={()=>this.onSelectTimeSpan(arr[i])}>
-                    <Text style={{fontSize:18,color:'white',padding:8,fontWeight: '400'}}>{arr[i].showText}</Text>
+                return <TouchableOpacity key={i} underlayColor={'transparent'}
+                                         onPress={() => this.onSelectTimeSpan(arr[i])}>
+                    <Text style={{fontSize: 18, color: 'white', padding: 8, fontWeight: '400'}}>{arr[i].showText}</Text>
                 </TouchableOpacity>
             })}
         </Popover>;
         return <View style={styles.container}>
-            <NavigationBar titleView={this.renderTitleView()} statusBar={{backgroundColor: '#2196f3'}}
-                           style={{backgroundColor: '#2196f3'}}/>
+            <NavigationBar
+                titleView={this.renderTitleView()}
+                leftButton={<View/>}
+                rightButton={ViewUtils.getMoreButton(() => this.refs.moreMenu.open())}
+                statusBar={{backgroundColor: '#2196f3'}}
+                style={{backgroundColor: '#2196f3'}}/>
             {content}
             {timeSpanView}
+            {this.renderMoreView()}
         </View>
     }
 }
@@ -136,12 +170,12 @@ export default class TrendingPage extends Component {
 class TrendingTab extends Component {
     constructor(props) {
         super(props);
-        this.isFavoriteChange=false;
+        this.isFavoriteChange = false;
         this.state = {
             result: '',
             isLoading: false,
             dataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}),
-            favoriteKeys:[]
+            favoriteKeys: []
         }
     }
 
@@ -149,39 +183,25 @@ class TrendingTab extends Component {
     /**
      * 更新project item收藏状态
      */
-    flushFavoriteState(){
+    flushFavoriteState() {
         let projectModels = [];
         let items = this.items;
-        for(let i =0 ,len = items.length;i<len;i++){
-            projectModels.push(new ProjectModel(items[i],Utils.checkFavorite(items[i],this.state.favoriteKeys)))
+        for (let i = 0, len = items.length; i < len; i++) {
+            projectModels.push(new ProjectModel(items[i], Utils.checkFavorite(items[i], this.state.favoriteKeys)))
         }
         this.updateState({
-            isLoading:false,
-            dataSource:this.getDataSource(projectModels),
+            isLoading: false,
+            dataSource: this.getDataSource(projectModels),
         })
     }
 
-    /**
-     * favoriteIcon单击回调函数
-     * @param item
-     * @param isFavorite
-     */
-    onFavorite(item,isFavorite){
-        if (isFavorite) {
-            favoriteDao.saveFavoriteItem(item.fullName.toString(),JSON.stringify(item))
-        }else {
-            favoriteDao.removeFavoriteItem(item.fullName.toString())
-        }
-    }
-
-
-    getDataSource(data){
+    getDataSource(data) {
         return this.state.dataSource.cloneWithRows(data);
     }
 
-    getFavoriteKeys(){
+    getFavoriteKeys() {
         favoriteDao.getFavoriteKeys()
-            .then(keys=>{
+            .then(keys => {
                 if (keys) {
                     this.updateState({
                         favoriteKeys: keys
@@ -189,41 +209,41 @@ class TrendingTab extends Component {
                 }
                 this.flushFavoriteState();
             })
-            .catch(e=>{
+            .catch(e => {
                 this.flushFavoriteState()
             })
     }
 
-    updateState(dic){
+    updateState(dic) {
         if (!this) return;
         this.setState(dic);
     }
 
     componentDidMount(): void {
-        this.onLoad(this.props.timeSpan,true)
-        this.listener= DeviceEventEmitter.addListener('favoriteChanged_trending',()=>{
+        this.onLoad(this.props.timeSpan, true)
+        this.listener = DeviceEventEmitter.addListener('favoriteChanged_trending', () => {
             this.isFavoriteChange = true;
         })
     }
 
     componentWillUnmount(): void {
-        if (this.listener){
+        if (this.listener) {
             this.listener.remove();
         }
     }
 
     componentWillReceiveProps(nextProps: Readonly<P>, nextContext: any): void {
         if (this.isFavoriteChange) {
-            this.isFavoriteChange=false;
+            this.isFavoriteChange = false;
             this.getFavoriteKeys()
         }
     }
 
     getFetchUrl(timeSpan, category) {
-        return API_URL + category +'?'+ timeSpan.searchText
+        return API_URL + category + '?' + timeSpan.searchText
     }
 
-    onLoad(timeSpan,isRefresh) {
+    onLoad(timeSpan, isRefresh) {
         this.updateState({
             isLoading: true
         });
@@ -233,7 +253,7 @@ class TrendingTab extends Component {
             .then(result => {
                 this.items = result && result.items ? result.items : result ? result : [];
                 this.getFavoriteKeys();
-                if (!this.items||isRefresh&&result && result.update_date && !dataRespository.checkData(result.update_date)) {
+                if (!this.items || isRefresh && result && result.update_date && !dataRespository.checkData(result.update_date)) {
                     return dataRespository.fetchNetRepository(url)
                 }
             })
@@ -247,38 +267,30 @@ class TrendingTab extends Component {
             })
             .catch(error => {
                 this.updateState({
-                    isLoading:false
+                    isLoading: false
                 })
             });
     }
 
-    onSelect(projectModel) {
-        var item = projectModel.item;
-        var route = {
-            title:item.fullName,
-            component: DescPage,
-            params: {
-                projectModel:projectModel,
-                flag: FLAG_STORAGE.flag_trending,
-                ...this.props,
-                parentComponent:this,
-
-            }
-        };
-        this.props.navigator.push(route)
-    }
 
     choose(projectModel) {
         return <TrendingCell
-            onSelect={() => this.onSelect(projectModel)}
+            onSelect={() => ActionUtils.onSelectRepository({
+                projectModel: projectModel,
+                flag: FLAG_STORAGE.flag_trending,
+                ...this.props,
+                parentComponent: this,
+            })}
             key={projectModel.item.fullName}
-            onFavorite={(item,isFavorite)=>this.onFavorite(item,isFavorite)}
+            onFavorite={(item, isFavorite) => ActionUtils.onFavorite(favoriteDao, item, isFavorite, FLAG_STORAGE.flag_trending)}
             projectModel={projectModel}/>
     }
 
-    onRefresh(){
-        this.onLoad(this.props.timeSpan,true);
+    onRefresh() {
+        this.onLoad(this.props.timeSpan, true);
     }
+
+
     render() {
         return <View style={styles.container}>
             <ListView

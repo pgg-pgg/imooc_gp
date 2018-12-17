@@ -4,7 +4,7 @@ import {
     Text,
     View,
     TouchableOpacity, Image, TouchableHighlight,
-    Alert,
+    Alert, DeviceEventEmitter,
 } from 'react-native';
 import NavigationBar from "../../common/NavigationBar";
 import CustomKeyPage from "./CustomKeyPage";
@@ -13,6 +13,7 @@ import LanguageDao from "../../expand/dao/LanguageDao";
 import ArrayUtils from "../../util/ArrayUtils";
 import SortableListView from "react-native-sortable-listview"
 import ViewUtils from "../../util/ViewUtils";
+import {ACTION_HOME, FLAG_TAB} from "../HomePage";
 
 export default class SortKeyPage extends Component {
     constructor(props) {
@@ -77,15 +78,14 @@ export default class SortKeyPage extends Component {
 
     onSave() {
         if (ArrayUtils.isEqual(this.originalCheckedArray, this.state.checkedArray)) {
-            this.props.navigator.pop()
             return;
         } else {
             this.getSortResult();
             this.languageDao.save(this.sortResultArray);
-            this.props.navigator.pop()
 
         }
-
+        let jumpToTab = this.props.flag === FLAG_LANGUAGE.flag_key?FLAG_TAB.flag_popularTab:FLAG_TAB.flag_trendingTab
+        DeviceEventEmitter.emit('ACTION_HOME',ACTION_HOME.A_RESTART,jumpToTab)
     }
 
     getSortResult() {
@@ -101,6 +101,7 @@ export default class SortKeyPage extends Component {
         let title = this.props.flag===FLAG_LANGUAGE.flag_language?'语言排序':'标签排序';
         return <View style={styles.container}>
             <NavigationBar title={title}
+                           statusBar={{backgroundColor: '#2196f3'}}
                            leftButton={ViewUtils.getLeftButton(() => this.onBack())}
                            rightButton={ViewUtils.getRightButton('保存', () => this.onSave())}
                            style={{backgroundColor: '#2196f3'}}/>

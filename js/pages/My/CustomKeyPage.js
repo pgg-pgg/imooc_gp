@@ -5,13 +5,14 @@ import {
     Image,
     Text,
     View,
-    ScrollView, Alert,
+    ScrollView, Alert,DeviceEventEmitter,
 } from 'react-native';
 import NavigationBar from "../../common/NavigationBar";
 import ViewUtils from "../../util/ViewUtils";
 import LanguageDao, {FLAG_LANGUAGE} from '../../expand/dao/LanguageDao'
 import CheckBox from "react-native-check-box"
 import ArrayUtils from "../../util/ArrayUtils";
+import {ACTION_HOME, FLAG_TAB} from "../HomePage";
 
 export default class CustomKeyPage extends Component {
     constructor(props) {
@@ -50,7 +51,8 @@ export default class CustomKeyPage extends Component {
             }
         }
         this.languageDao.save(this.state.dataArray);
-        this.props.navigator.pop();
+        let jumpToTab = this.props.flag === FLAG_LANGUAGE.flag_key?FLAG_TAB.flag_popularTab:FLAG_TAB.flag_trendingTab
+        DeviceEventEmitter.emit('ACTION_HOME',ACTION_HOME.A_RESTART,jumpToTab)
     }
 
 
@@ -134,6 +136,7 @@ export default class CustomKeyPage extends Component {
             <View style={styles.container}>
                 <NavigationBar
                     title={title}
+                    statusBar={{backgroundColor: '#2196f3'}}
                     style={{backgroundColor: '#2196f3'}}
                     leftButton={ViewUtils.getLeftButton(() => this.onBack())}
                     rightButton={ViewUtils.getRightButton(rightButtonTitle,()=>{this.onSave()})}

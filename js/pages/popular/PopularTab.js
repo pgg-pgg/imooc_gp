@@ -7,6 +7,7 @@ import {FLAG_STORAGE} from "../../expand/dao/DataRepository";
 import RepositoryCell from "../../common/RepositoryCell";
 import FavoriteDao from "../../expand/dao/FavoriteDao";
 import DataRepository from "../../expand/dao/DataRepository";
+import ActionUtils from "../../util/ActionUtils";
 
 const URL = "https://api.github.com/search/repositories?q=";
 const QUERY_STR = '&sort=stars';
@@ -114,37 +115,16 @@ export default class PopularTab extends Component {
                 })
             });
     }
-    onSelect(projectModel){
-        var route ={
-            component:DescPage,
-            params:{
-                flag: FLAG_STORAGE.flag_popular,
-                ...this.props,
-                projectModel: projectModel,
-
-            }
-        };
-        this.props.navigator.push(route)
-    }
-
-    /**
-     * favoriteIcon单击回调函数
-     * @param item
-     * @param isFavorite
-     */
-    onFavorite(item,isFavorite){
-        if (isFavorite) {
-            favoriteDao.saveFavoriteItem(item.id.toString(),JSON.stringify(item))
-        }else {
-            favoriteDao.removeFavoriteItem(item.id.toString())
-        }
-    }
 
     choose(projectModel) {
         return <RepositoryCell
-            onSelect={()=>this.onSelect(projectModel)}
+            onSelect={()=>ActionUtils.onSelectRepository({
+                flag: FLAG_STORAGE.flag_popular,
+                ...this.props,
+                projectModel: projectModel,
+            })}
             key={projectModel.item.id}
-            onFavorite={(item,isFavorite)=>this.onFavorite(item,isFavorite)}
+            onFavorite={(item,isFavorite)=>ActionUtils.onFavorite(favoriteDao,item, isFavorite)}
             projectModel={projectModel}/>
     }
 

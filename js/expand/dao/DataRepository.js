@@ -59,8 +59,6 @@ export default class DataRepository {
     }
 
     fetchNetRepository(url) {
-
-
         return new Promise((resolve, reject) => {
             if (this.flag === FLAG_STORAGE.flag_trending) {
                 this.trending.fetchTrending(url)
@@ -85,10 +83,10 @@ export default class DataRepository {
                     })
                     .then(responseData => {
                         if (this.flag === FLAG_STORAGE.flag_my && responseData) {
-                            this.saveRepository(url, responseData)
+                            this.saveRepository(url, responseData);
                             resolve(responseData);
                         } else if (responseData && responseData.items) {
-                            this.saveRepository(url, responseData.items)
+                            this.saveRepository(url, responseData.items);
                             resolve(responseData.items);
                         } else {
                             reject(new Error('responseData is null'));
@@ -121,9 +119,9 @@ export default class DataRepository {
         let cDate = new Date();
         let tDate = new Date();
         tDate.setTime(longTime);
-        if (cDate.getMonth()!==tDate.getMonth()) return false
-        if (cDate.getDay()!==tDate.getDay()) return false
-        if (cDate.getHours()-tDate.getHours()>4) return false
+        if (cDate.getMonth()!==tDate.getMonth()) return false;
+        if (cDate.getDay()!==tDate.getDay()) return false;
+        if (cDate.getHours()-tDate.getHours()>4) return false;
         return true
     }
 }

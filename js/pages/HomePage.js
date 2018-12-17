@@ -19,15 +19,19 @@ import {
 } from 'react-native';
 import TabNavigator from 'react-native-tab-navigator'
 import PopularPage from "./popular/PopularPage";
-import MyPage from "./My/MyPage";
 import Toast ,{DURATION}from "react-native-easy-toast";
-import WebViewTest from "./WebViewTest";
 import TrendingPage from "./trending/TrendingPage";
-import MobxTest from "../MobxTest";
 import FavoritePage from "./favorite/FavoritePage";
+import MyPage from "./My/MyPage";
 
 
-
+export const ACTION_HOME = {A_SHOW_TOAST:'showToast',A_RESTART:'restart'};
+export const FLAG_TAB={
+    flag_popularTab:'tb_popular',
+    flag_trendingTab:'tb_trending',
+    flag_favoriteTab:'tb_favorite',
+    flag_myTab:'tb_my',
+}
 export default class HomePage extends Component {
     constructor(props) {
         super(props);
@@ -38,13 +42,41 @@ export default class HomePage extends Component {
     }
 
     componentDidMount(): void {
-        this.listener = DeviceEventEmitter.addListener('showToast',(text)=>{
-            this.toast.show(text,DURATION.LENGTH_SHORT);
-        })
+        this.listener = DeviceEventEmitter.
+        addListener('ACTION_HOME',
+            (action,params)=>this.onAction(action,params));
+    }
 
+    /**
+     * 通知回调事件处理
+     * @param action
+     * @param params
+     */
+    onAction(action,params){
+        if(ACTION_HOME.A_RESTART===action){
+            this.onRestart(params)
+        }else if(ACTION_HOME.A_SHOW_TOAST===action){
+            this.toast.show(params.text,DURATION.LENGTH_SHORT);
+        }
+    }
+
+    /**
+     * 重启首页
+     * @param jumpToTab
+     */
+    onRestart(jumpToTab){
+        this.props.navigator.resetTo({
+            component:HomePage,
+            params:{
+                ...this.props,
+                selectedTab:jumpToTab
+            }
+        })
     }
     componentWillUnmount(): void {
-        this.listener&&this.listener.remove()
+        if (this.listener) {
+            this.listener.remove();
+        }
     }
     _renderType(Component,selectTab,title,renderIcon){
         return  <TabNavigator.Item

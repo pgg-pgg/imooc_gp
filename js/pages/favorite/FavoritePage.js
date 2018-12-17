@@ -15,12 +15,34 @@ import ProjectModel from "../../model/ProjectModel";
 import FavoriteDao from "../../expand/dao/FavoriteDao";
 import TrendingCell from "../../common/TrendingCell";
 import ArrayUtils from "../../util/ArrayUtils";
+import ActionUtils from "../../util/ActionUtils";
+import MoreMenu, {MORE_MENU} from "../../common/MoreMenu";
+import {FLAG_TAB} from "../HomePage";
+import ViewUtils from "../../util/ViewUtils";
 export default class FavoritePage extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
         }
+    }
+
+    renderMoreView() {
+        let params = {...this.props, fromPage: FLAG_TAB.flag_popularTab}
+        return <MoreMenu
+            ref="moreMenu"
+            {...params}
+            menus={[MORE_MENU.Custom_Theme,MORE_MENU.Share,
+                MORE_MENU.About_Author, MORE_MENU.About]}
+            anchorView={()=>this.refs.moreMenuButton}
+            onMoreMenuSelect={(e)=> {
+                if (e === MORE_MENU.Custom_Theme) {
+                    this.setState({
+                        customThemeViewVisible:true
+                    })
+                }
+            }}
+        />
     }
 
     render() {
@@ -35,8 +57,14 @@ export default class FavoritePage extends Component {
             <FavoriteTab tabLabel='趋势' flag={FLAG_STORAGE.flag_trending} {...this.props}/>
         </ScrollableTabView>
         return <View style={styles.container}>
-            <NavigationBar title={'收藏'} statusBar={{backgroundColor: '#2196f3'}} style={{backgroundColor: '#2196f3'}}/>
+            <NavigationBar
+                title={'收藏'}
+                leftButton={<View/>}
+                rightButton={ViewUtils.getMoreButton(()=>this.refs.moreMenu.open())}
+                statusBar={{backgroundColor: '#2196f3'}}
+                style={{backgroundColor: '#2196f3'}}/>
             {content}
+            {this.renderMoreView()}
         </View>
     }
 }
@@ -94,47 +122,17 @@ class FavoriteTab extends Component {
                 })
             })
     }
-    onSelect(projectModel){
-        var route ={
-            component:DescPage,
-            params:{
-                flag: FLAG_STORAGE.flag_popular,
-                ...this.props,
-                projectModel: projectModel,
-
-            }
-        };
-        this.props.navigator.push(route)
-    }
-
-    /**
-     * favoriteIcon单击回调函数
-     * @param item
-     * @param isFavorite
-     */
-    onFavorite(item,isFavorite){
-        const key = this.props.flag===FLAG_STORAGE.flag_popular ? item.id.toString() : item.fullName;
-        if (isFavorite) {
-            this.favoriteDao.saveFavoriteItem(key,JSON.stringify(item))
-        }else {
-            this.favoriteDao.removeFavoriteItem(key)
-        }
-        ArrayUtils.updateArray(this.unFavoriteItems,item);
-        if (this.unFavoriteItems.length > 0) {
-            if (this.props.flag === FLAG_STORAGE.flag_popular) {
-                DeviceEventEmitter.emit('favoriteChanged_popular');
-            }else {
-                DeviceEventEmitter.emit('favoriteChanged_trending')
-            }
-        }
-    }
 
     choose(projectModel) {
         let CellComponent = this.props.flag===FLAG_STORAGE.flag_popular?RepositoryCell:TrendingCell;
         return <CellComponent
-            onSelect={()=>this.onSelect(projectModel)}
+            onSelect={()=>ActionUtils.onSelectRepository({
+                flag: FLAG_STORAGE.flag_popular,
+                ...this.props,
+                projectModel: projectModel,
+            })}
             key={this.props.flag===FLAG_STORAGE.flag_popular?projectModel.item.id:projectModel.item.fullName}
-            onFavorite={(item,isFavorite)=>this.onFavorite(item,isFavorite)}
+            onFavorite={(item,isFavorite)=>ActionUtils.onFavorite(this.favoriteDao,item,isFavorite,this.props.flag)}
             projectModel={projectModel}/>
     }
 

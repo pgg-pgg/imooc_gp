@@ -9,6 +9,7 @@ import {
 import NavigationBar from "../common/NavigationBar"
 import HomePage from "./HomePage"
 import GuidePage from "./GuidePage";
+import ThemeDao from "../expand/dao/ThemeDao";
 export default class WelcomePage extends Component{
 
     openApp(){
@@ -20,6 +21,7 @@ export default class WelcomePage extends Component{
                 this.props.navigator.resetTo({
                     component:HomePage,
                     params:{
+                        theme:this.theme,
                         ...this.props
                     }
                 })
@@ -35,9 +37,12 @@ export default class WelcomePage extends Component{
         });
     }
     componentDidMount(): void {
+        new ThemeDao().getTheme().then(data=>{
+            this.theme = data;
+        })
         this.timer = setTimeout(()=>{
             this.openApp()
-        },2000)
+        },1000)
     }
 
     componentWillUnmount(): void {
@@ -50,7 +55,7 @@ export default class WelcomePage extends Component{
 
     render(){
         return <View style={{flex:1}}>
-            <NavigationBar style={{backgroundColor: '#2196f3'}} title={'欢迎页'}/>
+            <NavigationBar style={{backgroundColor: '#2196f3'}} statusBar={{backgroundColor: '#2196f3'}} title={'欢迎页'}/>
             <View style={{flex:1,justifyContent: 'center',backgroundColor:'#2196f3'}}>
                 <Text style={{textAlign:'center',alignItems: 'center',color:'white',fontSize:20}}>欢迎来到去哪儿</Text>
             </View>

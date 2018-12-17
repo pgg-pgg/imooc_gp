@@ -1,12 +1,18 @@
 import React, {Component} from 'react';
 import {
-    StyleSheet,
+    Image,
+    StyleSheet, TouchableOpacity,
     View,
 } from 'react-native';
-import NavigationBar from "../../common/NavigationBar"
+import NavigationBar from "../../common/NavigationBar";
 import ScrollableTabView, {ScrollableTabBar} from 'react-native-scrollable-tab-view'
 import LanguageDao, {FLAG_LANGUAGE} from '../../expand/dao/LanguageDao'
 import PopularTab from "./PopularTab";
+import ViewUtils from "../../util/ViewUtils";
+import SearchPage from "../SearchPage";
+import {MORE_MENU} from "../../common/MoreMenu";
+import {FLAG_TAB} from "../HomePage";
+import MoreMenu from "../../common/MoreMenu";
 
 export default class PopularPage extends Component {
 
@@ -33,6 +39,48 @@ export default class PopularPage extends Component {
         })
     }
 
+
+    renderRightButton() {
+        return <View style={{flexDirection:'row'}}>
+            <TouchableOpacity
+                onPress={()=> {
+                    this.props.navigator.push({
+                        component:SearchPage,
+                        params:{
+                            ...this.props
+                        }
+                    })
+                }}>
+                <View style={{padding:5,marginRight:8}}>
+                    <Image
+                        style={{width:24,height:24}}
+                        source={require('../../../res/images/ic_search_white_48pt.png')}
+                    />
+                </View>
+
+            </TouchableOpacity>
+            {ViewUtils.getMoreButton(()=>this.refs.moreMenu.open())}
+        </View>
+    }
+
+    renderMoreView(){
+        let params={...this.props,fromPage:FLAG_TAB.flag_popularTab};
+        return <MoreMenu
+            ref="moreMenu"
+            {...params}
+            menus={[MORE_MENU.Custom_Key,MORE_MENU.Sort_Key,MORE_MENU.Remove_Key,MORE_MENU.Share,MORE_MENU.Custom_Theme,
+                MORE_MENU.About_Author,MORE_MENU.About]}
+            anchorView={()=>this.refs.moreMenuButton}
+            onMoreMenuSelect={(e)=> {
+                if (e === MORE_MENU.Custom_Theme) {
+                    this.setState({
+                        customThemeViewVisible:true
+                    })
+                }
+            }}
+        />
+    }
+
     render() {
         let content = this.state.languages.length > 0 ? <ScrollableTabView
             tabBarBackgroundColor='#2196f3'
@@ -47,8 +95,14 @@ export default class PopularPage extends Component {
             })}
         </ScrollableTabView> : null;
         return <View style={styles.container}>
-            <NavigationBar title={'最热'} statusBar={{backgroundColor: '#2196f3'}} style={{backgroundColor: '#2196f3'}}/>
+            <NavigationBar
+                title={'最热'}
+                leftButton={<View/>}
+                rightButton={this.renderRightButton()}
+                statusBar={{backgroundColor: '#2196f3'}}
+                style={{backgroundColor: '#2196f3'}}/>
             {content}
+            {this.renderMoreView()}
         </View>
     }
 }
@@ -58,38 +112,5 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#F5FCFF',
     },
-    page1: {
-        flex: 1,
-        backgroundColor: 'red'
-    },
-    page2: {
-        flex: 2,
-        backgroundColor: 'green'
-    },
-    image: {
-        width: 22,
-        height: 22
-    },
-    item: {
-        backgroundColor: '#169',
-        height: 100,
-        margin: 15,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    text_my: {
-        color: 'black',
-        fontSize: 20,
-    },
-    text: {
-        color: 'white',
-        fontSize: 20,
-    },
-    indicatorContainer: {
-        alignItems: 'center'
-    },
-    indicator: {
-        color: 'red',
-        margin: 10
-    }
+
 });
