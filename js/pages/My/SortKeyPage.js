@@ -14,21 +14,34 @@ import ArrayUtils from "../../util/ArrayUtils";
 import SortableListView from "react-native-sortable-listview"
 import ViewUtils from "../../util/ViewUtils";
 import {ACTION_HOME, FLAG_TAB} from "../HomePage";
+import BackPressComponent from "../../common/BackPressComponent";
 
 export default class SortKeyPage extends Component {
     constructor(props) {
-        super(props)
+        super(props);
+        this.backPress = new BackPressComponent({backPress:(e)=>this.onBackPress(e)});
         this.dataArray = [];
         this.sortResultArray = [];
         this.originalCheckedArray = [];
         this.state = ({
-            checkedArray: []
+            checkedArray: [],
+            theme:this.props.theme,
         })
     }
 
     componentDidMount() {
         this.languageDao = new LanguageDao(this.props.flag);
         this.loadData()
+        this.backPress.componentDidMount();
+    }
+
+    componentWillUnmount(): void {
+        this.backPress.componentWillUnmount();
+    }
+
+    onBackPress(e){
+        this.onBack();
+        return true;
     }
 
     loadData() {
@@ -98,13 +111,17 @@ export default class SortKeyPage extends Component {
     }
 
     render() {
+        let statusBar = {
+            backgroundColor:this.state.theme.themeColor
+        };
         let title = this.props.flag===FLAG_LANGUAGE.flag_language?'语言排序':'标签排序';
         return <View style={styles.container}>
             <NavigationBar title={title}
-                           statusBar={{backgroundColor: '#2196f3'}}
+                           statusBar={statusBar}
+                           style={this.state.theme.styles.navBar}
                            leftButton={ViewUtils.getLeftButton(() => this.onBack())}
                            rightButton={ViewUtils.getRightButton('保存', () => this.onSave())}
-                           style={{backgroundColor: '#2196f3'}}/>
+            />
             <SortableListView
                 style={{flex: 1}}
                 data={this.state.checkedArray}
@@ -113,7 +130,9 @@ export default class SortKeyPage extends Component {
                     this.state.checkedArray.splice(e.to, 0, this.state.checkedArray.splice(e.from, 1)[0]);
                     this.forceUpdate();
                 }}
-                renderRow={row => <SortCell data={row}/>}
+                renderRow={row => <SortCell
+                    theme={this.props.theme}
+                    data={row}/>}
             />
 
         </View>
@@ -132,7 +151,7 @@ class SortCell extends Component {
                     width: 16,
                     height: 16,
                     marginRight: 10,
-                },]}/>
+                },this.props.theme.styles.tabBarSelectedIcon]}/>
                 <Text>{this.props.data.name}</Text>
             </View>
         </TouchableHighlight>)

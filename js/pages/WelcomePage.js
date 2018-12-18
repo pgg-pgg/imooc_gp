@@ -10,6 +10,7 @@ import NavigationBar from "../common/NavigationBar"
 import HomePage from "./HomePage"
 import GuidePage from "./GuidePage";
 import ThemeDao from "../expand/dao/ThemeDao";
+import SplashScreen from 'react-native-splash-screen'
 export default class WelcomePage extends Component{
 
     openApp(){
@@ -19,6 +20,7 @@ export default class WelcomePage extends Component{
                 console.log('不是第一次打开');
 
                 this.props.navigator.resetTo({
+
                     component:HomePage,
                     params:{
                         theme:this.theme,
@@ -27,11 +29,13 @@ export default class WelcomePage extends Component{
                 })
 
             } else  {
-
                 console.log('第一次打开');
-
                 this.props.navigator.replace({
-                    component:GuidePage
+                    component:GuidePage,
+                    params:{
+                        theme:this.theme,
+                        ...this.props
+                    }
                 })
             }
         });
@@ -41,6 +45,7 @@ export default class WelcomePage extends Component{
             this.theme = data;
         })
         this.timer = setTimeout(()=>{
+            SplashScreen.hide();
             this.openApp()
         },1000)
     }
@@ -54,11 +59,6 @@ export default class WelcomePage extends Component{
     }
 
     render(){
-        return <View style={{flex:1}}>
-            <NavigationBar style={{backgroundColor: '#2196f3'}} statusBar={{backgroundColor: '#2196f3'}} title={'欢迎页'}/>
-            <View style={{flex:1,justifyContent: 'center',backgroundColor:'#2196f3'}}>
-                <Text style={{textAlign:'center',alignItems: 'center',color:'white',fontSize:20}}>欢迎来到去哪儿</Text>
-            </View>
-        </View>
+        return null;
     }
 }

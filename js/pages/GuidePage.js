@@ -36,7 +36,11 @@ export default class GuidePage extends Component {
                                 }
                             });
                             this.props.navigator.resetTo({
-                                component:HomePage
+                                component:HomePage,
+                                params:{
+                                    // theme:this.props.theme,
+                                    ...this.props
+                                }
                             })
                         }}>
                             <Text style={styles.text}>开始使用</Text>

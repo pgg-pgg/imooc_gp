@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">imooc_gp</string>
+    <string moduleConfig="true" name="reactNativeCodePush_androidDeploymentKey">W04YcoaS5PQkUmfqJX21m_BZ5JaJ6c25def9-0d6a-4279-924d-21bf9b2df11c</string>
+
+    <string name="app_name">GitHub Popular</string>
 </resources>

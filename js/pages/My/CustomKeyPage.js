@@ -13,21 +13,35 @@ import LanguageDao, {FLAG_LANGUAGE} from '../../expand/dao/LanguageDao'
 import CheckBox from "react-native-check-box"
 import ArrayUtils from "../../util/ArrayUtils";
 import {ACTION_HOME, FLAG_TAB} from "../HomePage";
+import BackPressComponent from "../../common/BackPressComponent";
 
 export default class CustomKeyPage extends Component {
     constructor(props) {
         super(props);
+        this.backPress = new BackPressComponent({backPress:(e)=>this.onBackPress(e)});
         this.languageDao = new LanguageDao(this.props.flag);
         this.isRemoveKey = !!this.props.isRemoveKey;
         this.changeValues = [];
         this.state = {
-            dataArray: []
+            dataArray: [],
+            theme:this.props.theme,
         }
     }
 
     componentDidMount(): void {
         this.loadData();
+        this.backPress.componentDidMount();
     }
+
+    componentWillUnmount(): void {
+        this.backPress.componentWillUnmount();
+    }
+
+    onBackPress(e){
+        this.onBack();
+        return true;
+    }
+
 
     loadData() {
         this.languageDao.fetch()
@@ -51,7 +65,7 @@ export default class CustomKeyPage extends Component {
             }
         }
         this.languageDao.save(this.state.dataArray);
-        let jumpToTab = this.props.flag === FLAG_LANGUAGE.flag_key?FLAG_TAB.flag_popularTab:FLAG_TAB.flag_trendingTab
+        let jumpToTab = this.props.flag === FLAG_LANGUAGE.flag_key?FLAG_TAB.flag_popularTab:FLAG_TAB.flag_trendingTab;
         DeviceEventEmitter.emit('ACTION_HOME',ACTION_HOME.A_RESTART,jumpToTab)
     }
 
@@ -121,14 +135,17 @@ export default class CustomKeyPage extends Component {
                 style={{flex: 1, padding: 10}}
                 leftText={leftText}
                 isChecked={isChecked}
-                checkedImage={<Image style={{tintColor: '#6495ED'}} source={require('./img/ic_check_box.png')}/>}
-                unCheckedImage={<Image style={{tintColor: '#6495ED'}}
+                checkedImage={<Image style={this.state.theme.styles.tabBarSelectedIcon} source={require('./img/ic_check_box.png')}/>}
+                unCheckedImage={<Image style={this.state.theme.styles.tabBarSelectedIcon}
                                        source={require('./img/ic_check_box_outline_blank.png')}/>}
             />
         )
     }
 
     render() {
+        let statusBar = {
+            backgroundColor:this.state.theme.themeColor
+        };
         let rightButtonTitle = this.isRemoveKey?'移除':'保存';
         let title = this.isRemoveKey ? '标签移除' : '自定义标签';
         title = this.props.flag===FLAG_LANGUAGE.flag_language?'自定义语言':title;
@@ -136,8 +153,8 @@ export default class CustomKeyPage extends Component {
             <View style={styles.container}>
                 <NavigationBar
                     title={title}
-                    statusBar={{backgroundColor: '#2196f3'}}
-                    style={{backgroundColor: '#2196f3'}}
+                    statusBar={statusBar}
+                    style={this.state.theme.styles.navBar}
                     leftButton={ViewUtils.getLeftButton(() => this.onBack())}
                     rightButton={ViewUtils.getRightButton(rightButtonTitle,()=>{this.onSave()})}
                 />

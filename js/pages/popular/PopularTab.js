@@ -22,7 +22,8 @@ export default class PopularTab extends Component {
             result: '',
             isLoading: false,
             dataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}),
-            favoriteKeys :[]
+            favoriteKeys :[],
+            theme:this.props.theme,
         }
     }
 
@@ -43,6 +44,11 @@ export default class PopularTab extends Component {
         if (this.isFavoriteChange) {
             this.isFavoriteChange=false;
             this.getFavoriteKeys()
+        }else if (nextProps.theme !== this.state.theme) {
+            this.updateState({
+                theme:nextProps.theme,
+            })
+            this.flushFavoriteState()
         }
     }
 
@@ -123,6 +129,7 @@ export default class PopularTab extends Component {
                 ...this.props,
                 projectModel: projectModel,
             })}
+            theme={this.state.theme}
             key={projectModel.item.id}
             onFavorite={(item,isFavorite)=>ActionUtils.onFavorite(favoriteDao,item, isFavorite)}
             projectModel={projectModel}/>
@@ -137,10 +144,10 @@ export default class PopularTab extends Component {
                     <RefreshControl
                         refreshing={this.state.isLoading}
                         onRefresh={() => this.onLoad()}
-                        color={['#2196f3']}
-                        tintColor={'#2196f3'}
+                        color={this.state.theme.themeColor}
+                        tintColor={this.state.theme.themeColor}
                         title={'Loading...'}
-                        titleColor={'#2196f3'}
+                        titleColor={this.state.theme.themeColor}
                     />
                 }
 

@@ -21,6 +21,8 @@ import SortKeyPage from "../pages/My/SortKeyPage";
 import AboutMePage from "../pages/My/about/AboutMePage";
 import AboutPage from "../pages/My/about/AboutPage";
 import Popover from "./Popover";
+import UShare from '../common/UShare'
+import share from '../../res/data/share'
 
 
 
@@ -120,9 +122,9 @@ export default class MoreMenu extends Component {
                 }).catch(err => console.error('An error occurred', err));
                 break;
             case MORE_MENU.Share:
-                // var shareApp=share.share_app;
-                // UShare.share(shareApp.title, shareApp.content,
-                //     shareApp.imgUrl,shareApp.url,()=>{},()=>{})
+                const shareApp = share.share_app;
+                UShare.share(shareApp.title, shareApp.content,
+                    shareApp.imgUrl,shareApp.url,()=>{},()=>{});
                 break;
         }
         if (TargetComponent) {

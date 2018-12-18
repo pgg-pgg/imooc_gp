@@ -16,12 +16,14 @@ import RepositoryCell from "../../../common/RepositoryCell";
 import DescPage from "../../popular/DescPage";
 import RepositoryUtils from "../../../expand/dao/RepositoryUtils";
 import ActionUtils from "../../../util/ActionUtils";
+import BackPressComponent from "../../../common/BackPressComponent";
 
 
 export var FLAG_ABOUT = {flag_about:'about',flag_about_me:'about_me'};
 export default class AboutCommon {
     constructor(props,updateState,flag_about,config) {
         this.props = props;
+        this.backPress = new BackPressComponent({backPress:(e)=>this.onBackPress(e)});
         this.updateState = updateState;
         this.flag_about = flag_about;
         this.config = config;
@@ -42,6 +44,7 @@ export default class AboutCommon {
             }
             this.repositoryUtils.fetchRepositories(urls);
         }
+        this.backPress.componentDidMount();
     }
 
 
@@ -78,6 +81,15 @@ export default class AboutCommon {
         })
     }
 
+    componentWillUnmount(): void {
+        this.backPress.componentWillUnmount();
+    }
+
+    onBackPress(e){
+        this.props.navigator.pop();
+        return true;
+    }
+
 
     /**
      * 创建项目视图
@@ -96,6 +108,7 @@ export default class AboutCommon {
                         ...this.props,
                         flag: FLAG_STORAGE.flag_popular,
                     })}
+                    theme={this.props.theme}
                     key={projectModel.item.id}
                     onFavorite={(item,isFavorite)=>ActionUtils.onFavorite(this.favoriteDao,item, isFavorite,FLAG_STORAGE.flag_popular)}
                     projectModel={projectModel}/>
@@ -159,7 +172,7 @@ export default class AboutCommon {
         return (
             <ParallaxScrollView
                 headerBackgroundColor="#333"
-                backgroundColor={'#2196f3'}
+                backgroundColor={this.props.theme.themeColor}
                 stickyHeaderHeight={STICKY_HEADER_HEIGHT}
                 parallaxHeaderHeight={PARALLAX_HEADER_HEIGHT}
                 backgroundSpeed={10}

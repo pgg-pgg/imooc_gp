@@ -24,6 +24,7 @@ export default class NavigationBar extends Component {
         style: PropTypes.object,
         title: PropTypes.string,
         titleView: PropTypes.element,
+        titleLayoutStyle:PropTypes.object,
         hide: PropTypes.bool,
         leftButton: PropTypes.element,
         rightButton: PropTypes.element,
@@ -47,13 +48,13 @@ export default class NavigationBar extends Component {
 
     render() {
         let status = <View style={[styles.statusBar,this.props.statusBar]}><StatusBar {...this.props.statusBar}/></View>;
-        let titleView = this.props.titleView?this.props.titleView:<Text style={styles.title}>{this.props.title}</Text>;
+        let titleView = this.props.titleView?this.props.titleView:<Text ellipsizeMode={'tail'} numberOfLines={1} style={styles.title}>{this.props.title}</Text>;
 
         let content = <View style={[styles.navBar,this.props.style]}>
             {this.props.leftButton}
-            <View style={styles.titleViewContainer}>{titleView}</View>
+            <View style={[styles.titleViewContainer,this.props.titleLayoutStyle]}>{titleView}</View>
             {this.props.rightButton}
-        </View>
+        </View>;
         return (
             <View style={[styles.container,this.props.statusBar]}>
                 {status}
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
         bottom:0,
     },
     title:{
-        fontSize:20,
+        fontSize:18,
         color:'white',
     },
     statusBar: {

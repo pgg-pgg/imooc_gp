@@ -23,28 +23,49 @@ import Toast ,{DURATION}from "react-native-easy-toast";
 import TrendingPage from "./trending/TrendingPage";
 import FavoritePage from "./favorite/FavoritePage";
 import MyPage from "./My/MyPage";
+import BaseComponent from "./BaseComponent";
+import codePush from "react-native-code-push";
 
 
-export const ACTION_HOME = {A_SHOW_TOAST:'showToast',A_RESTART:'restart'};
+export const ACTION_HOME = {A_SHOW_TOAST:'showToast',A_RESTART:'restart',A_THEME:'THEME'};
 export const FLAG_TAB={
     flag_popularTab:'tb_popular',
     flag_trendingTab:'tb_trending',
     flag_favoriteTab:'tb_favorite',
     flag_myTab:'tb_my',
 }
-export default class HomePage extends Component {
+export default class HomePage extends BaseComponent {
     constructor(props) {
         super(props);
         let selectedTab=this.props.selectedTab?this.props.selectedTab:'tb_popular';
         this.state = {
-            selectedTab: selectedTab
+            selectedTab: selectedTab,
+            theme:this.props.theme,
         }
     }
 
     componentDidMount(): void {
+        super.componentDidMount();
         this.listener = DeviceEventEmitter.
         addListener('ACTION_HOME',
             (action,params)=>this.onAction(action,params));
+        this.update();
+    }
+
+    /**
+     * 想codepush检查更新
+     */
+    update(){
+        codePush.sync({
+            updateDialog:{
+                appendReleaseDescription:true,
+                descriptionPrefix:'更新内容',
+                title:'更新',
+                mandatoryUpdateMessage:'',
+                mandatoryContinueButtonLabel:'更新',
+            },
+            mandatoryInstallMode:codePush.InstallMode.ON_NEXT_RESTART,
+        });
     }
 
     /**
@@ -74,6 +95,7 @@ export default class HomePage extends Component {
         })
     }
     componentWillUnmount(): void {
+        super.componentWillUnmount();
         if (this.listener) {
             this.listener.remove();
         }
@@ -81,14 +103,14 @@ export default class HomePage extends Component {
     _renderType(Component,selectTab,title,renderIcon){
         return  <TabNavigator.Item
             selected={this.state.selectedTab === selectTab}
-            selectedTitleStyle={{color:'#2196f3'}}
+            selectedTitleStyle={this.state.theme.styles.selectedTitleStyle}
             title={title}
             renderIcon={() => <Image style={styles.image} source={renderIcon}/>}
-            renderSelectedIcon={() => <Image style={[styles.image,{tintColor:'#2196f3'}]} source={renderIcon}/>}
+            renderSelectedIcon={() => <Image style={[styles.image,this.state.theme.styles.tabBarSelectedIcon]} source={renderIcon}/>}
             // badgeText="1"
             onPress={() => this.setState({selectedTab: selectTab})}>
             <View style={styles.page1}>
-                <Component {...this.props}/>
+                <Component {...this.props} theme={this.state.theme}/>
             </View>
         </TabNavigator.Item>
     }

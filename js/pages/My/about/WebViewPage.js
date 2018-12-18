@@ -14,7 +14,8 @@ export default class WebViewPage extends Component{
         this.state={
             url:this.props.url,
             title:this.props.title,
-            canGoBack:false
+            canGoBack:false,
+            theme:this.props.theme,
         }
     }
     onBackPress(){
@@ -31,11 +32,15 @@ export default class WebViewPage extends Component{
         })
     }
     render(){
+
+        let statusBar = {
+            backgroundColor:this.state.theme.themeColor
+        };
         return <View style={GlobalStyles.root_container}>
             <NavigationBar title={this.props.title}
                            leftButton={ViewUtils.getLeftButton(()=>this.onBackPress())}
-                           statusBar={{backgroundColor: '#2196f3'}}
-                           style={{backgroundColor: '#2196f3'}} />
+                           statusBar={statusBar}
+                           style={this.state.theme.styles.navBar} />
             <WebView ref={webView=>this.webView=webView} source={{uri:this.state.url}} onNavigationStateChange={(e)=>
             this.onNavigationStateChange(e)}>
             </WebView>

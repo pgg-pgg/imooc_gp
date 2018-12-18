@@ -73,11 +73,16 @@ export default class AboutMePage extends Component {
             showBlog: false,
             showQQ: false,
             showContact: false,
+            theme:this.props.theme,
         }
     }
 
     componentDidMount(): void {
         this.aboutCommon.componentDidMount();
+    }
+
+    componentWillUnmount(): void {
+        this.aboutCommon.componentWillUnmount();
     }
 
     updateState(dic) {
@@ -153,7 +158,7 @@ export default class AboutMePage extends Component {
             let title=isShowAccount?dic[i].title+':'+dic[i].account:dic[i].title;
             views.push(
                 <View key={i}>
-                    {ViewUtils.getSettingItem(()=>this.onClick(dic[i]),'',title,{tintColor: '#2196f3'})}
+                    {ViewUtils.getSettingItem(()=>this.onClick(dic[i]),'',title,this.state.theme.styles.tabBarSelectedIcon)}
                     <View style={GlobalStyles.line}/>
                 </View>
 
@@ -167,28 +172,28 @@ export default class AboutMePage extends Component {
         let content = <View>
             {ViewUtils.getSettingItem(() =>
                 this.onClick(FLAG.BLOG), require('../../../../res/images/ic_computer.png'),
-                FLAG.BLOG.name, {tintColor: '#2196f3'},
+                FLAG.BLOG.name, this.state.theme.styles.tabBarSelectedIcon,
                 this.getClickIcon(this.state.showBlog))}
             <View style={GlobalStyles.line}/>
             {this.state.showBlog?this.renderItems(FLAG.BLOG.items):null}
 
             {ViewUtils.getSettingItem(() =>
                     this.onClick(FLAG.REPOSITORY), require('../../../../res/images/ic_code.png'),
-                FLAG.REPOSITORY, {tintColor: '#2196f3'},
+                FLAG.REPOSITORY, this.state.theme.styles.tabBarSelectedIcon,
                 this.getClickIcon(this.state.showRepository))}
             <View style={GlobalStyles.line}/>
             {this.state.showRepository ? this.aboutCommon.renderRepository(this.state.projectModels) : null}
 
             {ViewUtils.getSettingItem(() =>
                     this.onClick(FLAG.QQ), require('../../../../res/images/ic_computer.png'),
-                FLAG.QQ.name, {tintColor: '#2196f3'},
+                FLAG.QQ.name, this.state.theme.styles.tabBarSelectedIcon,
                 this.getClickIcon(this.state.showQQ))}
             <View style={GlobalStyles.line}/>
             {this.state.showQQ?this.renderItems(FLAG.QQ.items,true):null}
 
             {ViewUtils.getSettingItem(() =>
                     this.onClick(FLAG.CONTACT), require('../../../../res/images/ic_contacts.png'),
-                FLAG.CONTACT.name, {tintColor: '#2196f3'},
+                FLAG.CONTACT.name, this.state.theme.styles.tabBarSelectedIcon,
                 this.getClickIcon(this.state.showContact))}
             <View style={GlobalStyles.line}/>
             {this.state.showContact?this.renderItems(FLAG.CONTACT.items,true):null}

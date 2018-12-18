@@ -27,6 +27,8 @@ import ActionUtils from "../../util/ActionUtils";
 import {FLAG_TAB} from "../HomePage";
 import MoreMenu, {MORE_MENU} from "../../common/MoreMenu";
 import ViewUtils from "../../util/ViewUtils";
+import BaseComponent from "../BaseComponent";
+import CustomTheme from "../My/CustomTheme";
 
 const API_URL = "https://github.com/trending/";
 var timeSpanTextArray = [new TimeSpan('今 天', 'since=daily'), new TimeSpan('本 周', 'since=weekly'), new TimeSpan('本 月', 'since=monthly')];
@@ -34,7 +36,7 @@ var favoriteDao = new FavoriteDao(FLAG_STORAGE.flag_trending);
 var dataRespository = new DataRepository(FLAG_STORAGE.flag_trending);
 
 
-export default class TrendingPage extends Component {
+export default class TrendingPage extends BaseComponent {
 
     constructor(props) {
         super(props);
@@ -43,11 +45,14 @@ export default class TrendingPage extends Component {
             languages: [],
             isVisible: false,
             buttonRect: {},
-            timeSpan: timeSpanTextArray[0]
+            timeSpan: timeSpanTextArray[0],
+            theme:this.props.theme,
+            customThemeViewVisible: false,
         }
     }
 
     componentDidMount() {
+        super.componentDidMount();
         this.loadData();
     }
 
@@ -126,9 +131,24 @@ export default class TrendingPage extends Component {
         />
     }
 
+    renderCustomThemeView() {
+        return (
+            <CustomTheme visible={this.state.customThemeViewVisible}
+                         {...this.props}
+                         onClose={() => {
+                             this.setState({
+                                 customThemeViewVisible: false,
+                             })
+                         }}/>
+        )
+    }
+
     render() {
+        let statusBar = {
+            backgroundColor:this.state.theme.themeColor
+        };
         let content = this.state.languages.length > 0 ? <ScrollableTabView
-            tabBarBackgroundColor='#2196f3'
+            tabBarBackgroundColor={this.state.theme.themeColor}
             tabBarActiveTextColor='#fff'
             tabBarInactiveTextColor='#333'
             tabBarUnderlineStyle={{backgroundColor: '#e7e7e7', height: 2}}
@@ -158,11 +178,12 @@ export default class TrendingPage extends Component {
                 titleView={this.renderTitleView()}
                 leftButton={<View/>}
                 rightButton={ViewUtils.getMoreButton(() => this.refs.moreMenu.open())}
-                statusBar={{backgroundColor: '#2196f3'}}
-                style={{backgroundColor: '#2196f3'}}/>
+                statusBar={statusBar}
+                style={this.state.theme.styles.navBar}/>
             {content}
             {timeSpanView}
             {this.renderMoreView()}
+            {this.renderCustomThemeView()}
         </View>
     }
 }
@@ -175,7 +196,8 @@ class TrendingTab extends Component {
             result: '',
             isLoading: false,
             dataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}),
-            favoriteKeys: []
+            favoriteKeys: [],
+            theme:this.props.theme,
         }
     }
 
@@ -226,6 +248,10 @@ class TrendingTab extends Component {
         })
     }
 
+    onUpdateFavorite() {
+        this.getFavoriteKeys();
+    }
+
     componentWillUnmount(): void {
         if (this.listener) {
             this.listener.remove();
@@ -236,6 +262,11 @@ class TrendingTab extends Component {
         if (this.isFavoriteChange) {
             this.isFavoriteChange = false;
             this.getFavoriteKeys()
+        }else if (nextProps.theme !== this.state.theme) {
+            this.updateState({
+                theme:nextProps.theme,
+            });
+            this.flushFavoriteState()
         }
     }
 
@@ -280,7 +311,9 @@ class TrendingTab extends Component {
                 flag: FLAG_STORAGE.flag_trending,
                 ...this.props,
                 parentComponent: this,
+                onUpdateFavorite: ()=>this.onUpdateFavorite(),
             })}
+            theme={this.props.theme}
             key={projectModel.item.fullName}
             onFavorite={(item, isFavorite) => ActionUtils.onFavorite(favoriteDao, item, isFavorite, FLAG_STORAGE.flag_trending)}
             projectModel={projectModel}/>
@@ -300,10 +333,10 @@ class TrendingTab extends Component {
                     <RefreshControl
                         refreshing={this.state.isLoading}
                         onRefresh={() => this.onRefresh()}
-                        color={['#2196f3']}
-                        tintColor={'#2196f3'}
+                        color={this.state.theme.themeColor}
+                        tintColor={this.state.theme.themeColor}
                         title={'Loading...'}
-                        titleColor={'#2196f3'}
+                        titleColor={this.state.theme.themeColor}
                     />
                 }
 

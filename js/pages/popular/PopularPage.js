@@ -13,18 +13,23 @@ import SearchPage from "../SearchPage";
 import {MORE_MENU} from "../../common/MoreMenu";
 import {FLAG_TAB} from "../HomePage";
 import MoreMenu from "../../common/MoreMenu";
+import BaseComponent from "../BaseComponent";
+import CustomTheme from "../My/CustomTheme";
 
-export default class PopularPage extends Component {
+export default class PopularPage extends BaseComponent {
 
     constructor(props) {
         super(props);
         this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
         this.state = {
-            languages: []
+            languages: [],
+            customThemeViewVisible: false,
+            theme:this.props.theme,
         }
     }
 
     componentDidMount() {
+        super.componentDidMount()
         this.loadData();
     }
 
@@ -81,9 +86,25 @@ export default class PopularPage extends Component {
         />
     }
 
+    renderCustomThemeView() {
+        return (
+            <CustomTheme visible={this.state.customThemeViewVisible}
+                         {...this.props}
+                         onClose={() => {
+                             this.setState({
+                                 customThemeViewVisible: false,
+                             })
+                         }}/>
+        )
+    }
+
     render() {
+        let statusBar = {
+            backgroundColor:this.state.theme.themeColor,
+            barStyle:'light-content',
+        };
         let content = this.state.languages.length > 0 ? <ScrollableTabView
-            tabBarBackgroundColor='#2196f3'
+            tabBarBackgroundColor={this.state.theme.themeColor}
             tabBarActiveTextColor='#fff'
             tabBarInactiveTextColor='#333'
             tabBarUnderlineStyle={{backgroundColor: '#e7e7e7', height: 2}}
@@ -99,10 +120,11 @@ export default class PopularPage extends Component {
                 title={'最热'}
                 leftButton={<View/>}
                 rightButton={this.renderRightButton()}
-                statusBar={{backgroundColor: '#2196f3'}}
-                style={{backgroundColor: '#2196f3'}}/>
+                statusBar={statusBar}
+                style={this.state.theme.styles.navBar}/>
             {content}
             {this.renderMoreView()}
+            {this.renderCustomThemeView()}
         </View>
     }
 }

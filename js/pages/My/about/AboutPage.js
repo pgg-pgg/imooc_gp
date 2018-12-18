@@ -18,12 +18,17 @@ export default class AboutPage extends Component {
         this.aboutCommon = new AboutCommon(props,(dic)=>this.updateState(dic),FLAG_ABOUT.flag_about,config);
         this.state={
             projectModels :[],
-            author:config.author
+            author:config.author,
+            theme:this.props.theme,
+
         }
     }
 
     componentDidMount(): void {
         this.aboutCommon.componentDidMount();
+    }
+    componentWillUnmount(): void {
+        this.aboutCommon.componentWillUnmount();
     }
 
     updateState(dic){
@@ -41,14 +46,6 @@ export default class AboutPage extends Component {
                 params.title = 'Github Popular';
                 break;
             case MORE_MENU.Feedback:
-                // var url = '';
-                // Linking.canOpenURL(url).then(supported => {
-                //     if (!supported) {
-                //         console.log('Can\'t handle url: ' + url);
-                //     } else {
-                //         return Linking.openURL(url);
-                //     }
-                // }).catch(err => console.error('An error occurred', err));
                 break;
         }
 
@@ -63,13 +60,13 @@ export default class AboutPage extends Component {
     render(){
         let content = <View>
             {this.aboutCommon.renderRepository(this.state.projectModels)}
-            {ViewUtils.getSettingItem(()=>this.onClick(MORE_MENU.Website),require('../../../../res/images/ic_computer.png'),MORE_MENU.Website,{tintColor:'#2196f3'})}
+            {ViewUtils.getSettingItem(()=>this.onClick(MORE_MENU.Website),require('../../../../res/images/ic_computer.png'),MORE_MENU.Website,this.state.theme.styles.tabBarSelectedIcon)}
             <View style={GlobalStyles.line}/>
 
-            {ViewUtils.getSettingItem(()=>this.onClick(MORE_MENU.About_Author),require('../img/ic_insert_emoticon.png'),MORE_MENU.About_Author,{tintColor:'#2196f3'})}
+            {ViewUtils.getSettingItem(()=>this.onClick(MORE_MENU.About_Author),require('../img/ic_insert_emoticon.png'),MORE_MENU.About_Author,this.state.theme.styles.tabBarSelectedIcon)}
             <View style={GlobalStyles.line}/>
 
-            {ViewUtils.getSettingItem(()=>this.onClick(MORE_MENU.Feedback),require('../../../../res/images/ic_feedback.png'),MORE_MENU.Feedback,{tintColor:'#2196f3'})}
+            {ViewUtils.getSettingItem(()=>this.onClick(MORE_MENU.Feedback),require('../../../../res/images/ic_feedback.png'),MORE_MENU.Feedback,this.state.theme.styles.tabBarSelectedIcon)}
             <View style={GlobalStyles.line}/>
 
         </View>;

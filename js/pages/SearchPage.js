@@ -18,6 +18,7 @@ import ActionUtils from "../util/ActionUtils";
 import LanguageDao, {FLAG_LANGUAGE} from "../expand/dao/LanguageDao";
 import {ACTION_HOME} from "./HomePage";
 import makeCancelable from "../util/Cancleable";
+import BackPressComponent from "../common/BackPressComponent";
 
 const URL = "https://api.github.com/search/repositories?q=";
 const QUERY_STR = '&sort=stars';
@@ -25,6 +26,7 @@ export default class SearchPage extends Component {
 
     constructor(props) {
         super(props);
+        this.backPress = new BackPressComponent({backPress:(e)=>this.onBackPress(e)});
         this.favoriteDao = new FavoriteDao(FLAG_STORAGE.flag_popular);
         this.favoriteKeys = [];
         this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
@@ -35,12 +37,14 @@ export default class SearchPage extends Component {
             showBottomButton:false,
             isLoading: false,
             dataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}),
+            theme:this.props.theme,
         }
     }
 
 
     componentDidMount(): void {
-        this.initKeys()
+        this.initKeys();
+        this.backPress.componentDidMount();
     }
 
     componentWillUnmount(): void {
@@ -49,6 +53,7 @@ export default class SearchPage extends Component {
                 ACTION_HOME.A_RESTART)
         }
         this.cancelable&&this.cancelable.cancel();
+        this.backPress.componentWillUnmount();
     }
 
     async initKeys(){
@@ -183,7 +188,7 @@ export default class SearchPage extends Component {
         </TouchableOpacity>;
 
         return <View style={{
-            backgroundColor: '#2196f3',
+            backgroundColor: this.state.theme.themeColor,
             flexDirection: 'row',
             alignItems: 'center',
             padding: 8,
@@ -198,6 +203,7 @@ export default class SearchPage extends Component {
     onBackPress() {
         this.refs.input.blur();
         this.props.navigator.pop();
+        return true;
     }
 
     renderRow(projectModel) {
@@ -207,6 +213,7 @@ export default class SearchPage extends Component {
                 ...this.props,
                 projectModel: projectModel,
             })}
+            theme={this.props.theme}
             key={projectModel.item.id}
             onFavorite={(item,isFavorite)=>ActionUtils.onFavorite(this.favoriteDao,item, isFavorite)}
             projectModel={projectModel}/>
@@ -216,7 +223,7 @@ export default class SearchPage extends Component {
     render() {
         let statusBar = null;
         if (Platform.OS === 'ios') {
-            statusBar = <View style={[styles.statusBar, {backgroundColor: '#2196f3'}]}/>
+            statusBar = <View style={[styles.statusBar, {backgroundColor:this.state.theme.themeColor}]}/>
         }
         let listView =!this.state.isLoading? <ListView
             dataSource = {this.state.dataSource}
@@ -224,7 +231,7 @@ export default class SearchPage extends Component {
 
         />:null;
         let activityIndicator = this.state.isLoading?
-            <ActivityIndicator size={'large'} color={'#2196f3'} style={styles.centering} animating={this.state.isLoading}/>:null;
+            <ActivityIndicator size={'large'} color={this.state.theme.themeColor} style={styles.centering} animating={this.state.isLoading}/>:null;
 
         let resultView = <View style={{flex: 1}}>
             {activityIndicator}
@@ -234,7 +241,7 @@ export default class SearchPage extends Component {
         let bottomButton = this.state.showBottomButton?
             <TouchableOpacity
                 onPress={()=>this.saveKey()}
-                style={[styles.bottomButton,{backgroundColor:'#2196f3'}]}>
+                style={[styles.bottomButton,this.state.theme.themeColor]}>
                 <View style={{justifyContent: 'center'}}>
                     <Text style={styles.title}>添加标签</Text>
                 </View>

@@ -19,11 +19,16 @@ import ActionUtils from "../../util/ActionUtils";
 import MoreMenu, {MORE_MENU} from "../../common/MoreMenu";
 import {FLAG_TAB} from "../HomePage";
 import ViewUtils from "../../util/ViewUtils";
-export default class FavoritePage extends Component {
+import BaseComponent from "../BaseComponent";
+import CustomTheme from "../My/CustomTheme";
+
+export default class FavoritePage extends BaseComponent {
 
     constructor(props) {
         super(props);
         this.state = {
+            theme: this.props.theme,
+            customThemeViewVisible: false,
         }
     }
 
@@ -32,22 +37,37 @@ export default class FavoritePage extends Component {
         return <MoreMenu
             ref="moreMenu"
             {...params}
-            menus={[MORE_MENU.Custom_Theme,MORE_MENU.Share,
+            menus={[MORE_MENU.Custom_Theme, MORE_MENU.Share,
                 MORE_MENU.About_Author, MORE_MENU.About]}
-            anchorView={()=>this.refs.moreMenuButton}
-            onMoreMenuSelect={(e)=> {
+            anchorView={() => this.refs.moreMenuButton}
+            onMoreMenuSelect={(e) => {
                 if (e === MORE_MENU.Custom_Theme) {
                     this.setState({
-                        customThemeViewVisible:true
+                        customThemeViewVisible: true
                     })
                 }
             }}
         />
     }
 
+    renderCustomThemeView() {
+        return (
+            <CustomTheme visible={this.state.customThemeViewVisible}
+                         {...this.props}
+                         onClose={() => {
+                             this.setState({
+                                 customThemeViewVisible: false,
+                             })
+                         }}/>
+        )
+    }
+
     render() {
+        let statusBar = {
+            backgroundColor: this.state.theme.themeColor
+        };
         let content = <ScrollableTabView
-            tabBarBackgroundColor='#2196f3'
+            tabBarBackgroundColor={this.state.theme.themeColor}
             tabBarActiveTextColor='#fff'
             tabBarInactiveTextColor='#333'
             tabBarUnderlineStyle={{backgroundColor: '#e7e7e7', height: 2}}
@@ -60,11 +80,12 @@ export default class FavoritePage extends Component {
             <NavigationBar
                 title={'收藏'}
                 leftButton={<View/>}
-                rightButton={ViewUtils.getMoreButton(()=>this.refs.moreMenu.open())}
-                statusBar={{backgroundColor: '#2196f3'}}
-                style={{backgroundColor: '#2196f3'}}/>
+                rightButton={ViewUtils.getMoreButton(() => this.refs.moreMenu.open())}
+                statusBar={statusBar}
+                style={this.state.theme.styles.navBar}/>
             {content}
             {this.renderMoreView()}
+            {this.renderCustomThemeView()}
         </View>
     }
 }
@@ -72,13 +93,14 @@ export default class FavoritePage extends Component {
 class FavoriteTab extends Component {
     constructor(props) {
         super(props);
-        this.unFavoriteItems=[];
+        this.unFavoriteItems = [];
         this.favoriteDao = new FavoriteDao(this.props.flag);
         this.state = {
             result: '',
             isLoading: false,
             dataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}),
-            favoriteKeys :[]
+            favoriteKeys: [],
+            theme: this.props.theme,
         }
     }
 
@@ -90,12 +112,12 @@ class FavoriteTab extends Component {
         this.onLoad(false)
     }
 
-    updateState(dic){
+    updateState(dic) {
         if (!this) return;
         this.setState(dic);
     }
 
-    getDataSource(data){
+    getDataSource(data) {
         return this.state.dataSource.cloneWithRows(data);
     }
 
@@ -106,33 +128,34 @@ class FavoriteTab extends Component {
             });
         }
         this.favoriteDao.getAllItems()
-            .then(items=>{
+            .then(items => {
                 let resultData = [];
-                for(let i =0,len=items.length;i<len;i++){
-                    resultData.push(new ProjectModel(items[i],true));
+                for (let i = 0, len = items.length; i < len; i++) {
+                    resultData.push(new ProjectModel(items[i], true));
                 }
                 this.updateState({
-                    isLoading:false,
+                    isLoading: false,
                     dataSource: this.getDataSource(resultData)
                 })
             })
-            .catch(e=>{
+            .catch(e => {
                 this.updateState({
-                    isLoading:false
+                    isLoading: false
                 })
             })
     }
 
     choose(projectModel) {
-        let CellComponent = this.props.flag===FLAG_STORAGE.flag_popular?RepositoryCell:TrendingCell;
+        let CellComponent = this.props.flag === FLAG_STORAGE.flag_popular ? RepositoryCell : TrendingCell;
         return <CellComponent
-            onSelect={()=>ActionUtils.onSelectRepository({
+            onSelect={() => ActionUtils.onSelectRepository({
                 flag: FLAG_STORAGE.flag_popular,
                 ...this.props,
                 projectModel: projectModel,
             })}
-            key={this.props.flag===FLAG_STORAGE.flag_popular?projectModel.item.id:projectModel.item.fullName}
-            onFavorite={(item,isFavorite)=>ActionUtils.onFavorite(this.favoriteDao,item,isFavorite,this.props.flag)}
+            theme={this.props.theme}
+            key={this.props.flag === FLAG_STORAGE.flag_popular ? projectModel.item.id : projectModel.item.fullName}
+            onFavorite={(item, isFavorite) => ActionUtils.onFavorite(this.favoriteDao, item, isFavorite, this.props.flag)}
             projectModel={projectModel}/>
     }
 
@@ -146,10 +169,10 @@ class FavoriteTab extends Component {
                     <RefreshControl
                         refreshing={this.state.isLoading}
                         onRefresh={() => this.onLoad()}
-                        color={['#2196f3']}
-                        tintColor={'#2196f3'}
+                        color={this.state.theme.themeColor}
+                        tintColor={this.state.theme.themeColor}
                         title={'Loading...'}
-                        titleColor={'#2196f3'}
+                        titleColor={this.state.theme.themeColor}
                     />
                 }
 

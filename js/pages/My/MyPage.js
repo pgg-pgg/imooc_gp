@@ -17,12 +17,15 @@ import AboutMePage from "./about/AboutMePage";
 import AboutPage from "./about/AboutPage";
 import {MORE_MENU} from "../../common/MoreMenu";
 import CustomTheme from "./CustomTheme";
+import BaseComponent from "../BaseComponent";
+import codePush from "react-native-code-push";
 
-export default class MyPage extends Component {
+export default class MyPage extends BaseComponent {
     constructor(props) {
-        super(props)
+        super(props);
         this.state = {
             customThemeViewVisible: false,
+            theme:this.props.theme,
         }
     }
 
@@ -73,8 +76,9 @@ export default class MyPage extends Component {
         }
     }
 
+
     getItem(tag, icon, text) {
-        return ViewUtils.getSettingItem(() => this.onClick(tag), icon, text, {tintColor: '#2196f3'}, null);
+        return ViewUtils.getSettingItem(() => this.onClick(tag), icon, text, this.state.theme.styles.tabBarSelectedIcon, null);
     }
 
 
@@ -91,8 +95,13 @@ export default class MyPage extends Component {
     }
 
     render() {
-        let navigatorBar = <NavigationBar title={'我的'} statusBar={{backgroundColor: '#2196f3'}}
-                                          style={{backgroundColor: '#2196f3'}}/>;
+
+        let statusBar = {
+            backgroundColor:this.state.theme.themeColor
+        };
+        let navigatorBar = <NavigationBar title={'我的'}
+                                          statusBar={statusBar}
+                                          style={this.state.theme.styles.navBar}/>;
         return <View style={GlobalStyles.root_container}>
             {navigatorBar}
             <ScrollView>
@@ -101,11 +110,11 @@ export default class MyPage extends Component {
                     <View style={[styles.item, {height: 90}]}>
                         <View style={{flexDirection: 'row', alignItems: 'center'}}>
                             <Image source={require('../../../res/images/ic_trending.png')}
-                                   style={[{width: 40, height: 40, marginRight: 10}, {tintColor: '#2196f3'}]}/>
+                                   style={[{width: 40, height: 40, marginRight: 10}, this.state.theme.styles.tabBarSelectedIcon]}/>
 
                             <Text>Github Popular</Text>
                         </View>
-                        <Image style={[{marginRight: 10, height: 22, width: 22,}, {tintColor: '#2196f3'}]}
+                        <Image style={[{marginRight: 10, height: 22, width: 22,}, this.state.theme.styles.tabBarSelectedIcon]}
                                source={require('../../../res/images/ic_tiaozhuan.png')}/>
                     </View>
                 </TouchableHighlight>
@@ -139,7 +148,6 @@ export default class MyPage extends Component {
                 <View style={GlobalStyles.line}/>
                 {this.getItem(MORE_MENU.About_Author, require('./img/ic_insert_emoticon.png'), '关于作者')}
                 <View style={GlobalStyles.line}/>
-
 
             </ScrollView>
 
